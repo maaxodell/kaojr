@@ -1,0 +1,25 @@
+{
+  "name": "kaojr",
+  "version": "1.0.0",
+  "description": "Kao's discord.js bot.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/maaxodell/kaojr.git"
+  },
+  "author": "Max O'Dell",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/maaxodell/kaojr/issues"
+  },
+  "homepage": "https://github.com/maaxodell/kaojr#readme",
+  "dependencies": {
+    "discord.js": "^12.4.1",
+    "dotenv": "^8.2.0",
+    "nodemon": "^2.0.6"
+  }
+}
