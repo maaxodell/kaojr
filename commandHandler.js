@@ -1,9 +1,9 @@
+const Embed = require('./commands/about');
+
 const prefix = "!";
 const badPerms = "you do not have permission to do that!";
 
 const kao_id = process.env.KAO_ID;
-
-//if (message.author.id != client.user.id) message.reply(commandElements);
 
 function handleCommand(client, message) {
     // check if command prefix is supplied
@@ -16,7 +16,8 @@ function handleCommand(client, message) {
     // !about - for information on the bot
     if (command == "about") {
         message.react("❤️")
-        message.reply("I was written and developed by kaø and I live here -> `https://github.com/maaxodell/kaojr`")
+        embed = Embed();
+        message.channel.send(embed);
     }
 
     // !cleardev - purely for clearing the development text channel (for my use only)
