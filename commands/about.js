@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 
-function Embed() {
+function aboutEmbed() {
     // generate random colour
     var embedColour = [3];
     for (var i = 0; i < 3 ; i++) {
@@ -12,9 +12,10 @@ function Embed() {
         .setTitle("Abøut Me")
         .setDescription("I was written and developed by Kaø.")
         .setColor(embedColour)
+        .addFields({ name: "My Commands", value: 'Command list coming soon - for now just be friendly and say **!hello**' })
         .addFields({ name: "There is where I live!", value: "[GitHub](https://github.com/maaxodell/kaojr)" })
 
     return embed;
 }
 
-module.exports = Embed;
+module.exports = aboutEmbed;

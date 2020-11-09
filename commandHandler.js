@@ -1,4 +1,5 @@
-const Embed = require('./commands/about');
+const aboutEmbed = require('./commands/about');
+const hello = require('./commands/hello');
 
 const prefix = "!";
 const badPerms = "you do not have permission to do that!";
@@ -15,8 +16,8 @@ function handleCommand(client, message) {
 
     // !about - for information on the bot
     if (command == "about") {
-        message.react("❤️")
-        embed = Embed();
+        message.react("❤️");
+        embed = aboutEmbed();
         message.channel.send(embed);
     }
 
@@ -28,6 +29,12 @@ function handleCommand(client, message) {
             message.channel.messages.fetch().then(messages => { message.channel.bulkDelete(messages) });
         }
     }
+
+    if (command == "hello" || command == "hey") {
+        message.react("❤️");
+        message.channel.send(hello(message.author.toString()));
+    }
+
 }
 
 module.exports = handleCommand;
