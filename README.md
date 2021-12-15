@@ -1,1 +1,3 @@
-Kao's discord.js bot!
+Kao's discord.py bot.
+
+Message kaø#0692 for any questions.
