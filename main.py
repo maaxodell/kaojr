@@ -12,3 +12,5 @@ token = os.getenv("TOKEN")
 client = discord.Client()
 
 client.run(token)
+
+test = 'test'
