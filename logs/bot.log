@@ -1,0 +1,16 @@
+2021-12-28 20:15:06,800 logging in using static token
+2021-12-28 20:15:07,514 Shard ID None has sent the IDENTIFY payload.
+2021-12-28 20:15:07,772 Shard ID None has connected to Gateway: ["gateway-prd-main-425g",{"micros":35776,"calls":["discord-sessions-blue-prd-2-163",{"micros":35093,"calls":["start_session",{"micros":32600,"calls":["api-prd-main-2g8w",{"micros":26900,"calls":["get_user",{"micros":4583},"add_authorized_ip",{"micros":1366},"get_guilds",{"micros":3014},"coros_wait",{"micros":1}]}]},"guilds_connect",{"micros":1,"calls":[]},"presence_connect",{"micros":1877,"calls":[]}]}]}] (Session ID: c8c8995996784a75e1fb670b128bf8da).
+2021-12-28 20:15:33,701 Received signal to terminate bot and event loop.
+2021-12-28 20:15:33,701 Cleaning up tasks.
+2021-12-28 20:15:33,702 Cleaning up after 1 tasks.
+2021-12-28 20:15:33,703 All tasks finished cancelling.
+2021-12-28 20:15:33,703 Closing the event loop.
+2021-12-28 20:16:13,625 logging in using static token
+2021-12-28 20:16:14,393 Shard ID None has sent the IDENTIFY payload.
+2021-12-28 20:16:14,752 Shard ID None has connected to Gateway: ["gateway-prd-main-dgbm",{"micros":85764,"calls":["discord-sessions-blue-prd-2-110",{"micros":85061,"calls":["start_session",{"micros":37696,"calls":["api-prd-main-13h2",{"micros":34337,"calls":["get_user",{"micros":4724},"add_authorized_ip",{"micros":1635},"get_guilds",{"micros":6599},"coros_wait",{"micros":1}]}]},"guilds_connect",{"micros":2,"calls":[]},"presence_connect",{"micros":38860,"calls":[]}]}]}] (Session ID: 34cfc9d1e6d96ef5ac3328b639136b2c).
+2021-12-28 20:16:47,442 Received signal to terminate bot and event loop.
+2021-12-28 20:16:47,442 Cleaning up tasks.
+2021-12-28 20:16:47,442 Cleaning up after 1 tasks.
+2021-12-28 20:16:47,443 All tasks finished cancelling.
+2021-12-28 20:16:47,443 Closing the event loop.
