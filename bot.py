@@ -6,4 +6,4 @@ client = commands.Bot(command_prefix="!")
 async def on_ready():
     print("Connected")
 
-client.load_extension('commandCogs.HelpCommands')
+client.load_extension('commandCogs.helpCommands')
