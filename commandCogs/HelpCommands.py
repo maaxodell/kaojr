@@ -3,7 +3,7 @@ from messageLogger import log
 
 devChannelID = "770480715279761414"
 
-class HelpCommands(commands.Cog):
+class helpCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
     
@@ -17,4 +17,4 @@ class HelpCommands(commands.Cog):
         await ctx.send("Help is on it's way, " + ctx.author.name)
 
 def setup(bot):
-    bot.add_cog(HelpCommands(bot))
+    bot.add_cog(helpCommands(bot))
