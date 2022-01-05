@@ -1,7 +1,6 @@
 # Imports
 from dotenv import load_dotenv
 import os, sys
-test = 2
 
 from bot import client
 
