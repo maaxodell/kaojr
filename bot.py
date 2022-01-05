@@ -1,6 +1,9 @@
 from discord.ext import commands
+import discord
 
-client = commands.Bot(command_prefix="!")
+activity = discord.Activity(type=discord.ActivityType.listening, name="@kaø")
+
+client = commands.Bot(command_prefix="!", activity=activity)
 
 @client.event
 async def on_ready():
