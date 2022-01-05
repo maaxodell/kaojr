@@ -2,6 +2,8 @@
 from dotenv import load_dotenv
 import os, sys
 
+hooks = "testing"
+
 from bot import client
 
 sys.dont_write_bytecode = True
