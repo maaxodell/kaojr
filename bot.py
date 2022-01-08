@@ -1,9 +1,10 @@
 from discord.ext import commands
 import discord
+from discord.ext.commands.help import DefaultHelpCommand
 
-activity = discord.Activity(type=discord.ActivityType.listening, name="@kaø")
+activity = discord.Activity(type=discord.ActivityType.listening, name="!helpme")
 
-client = commands.Bot(command_prefix="!", activity=activity)
+client = commands.Bot(command_prefix="!", activity=activity, help_command=None)
 
 @client.event
 async def on_ready():
