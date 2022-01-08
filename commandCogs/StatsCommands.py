@@ -7,7 +7,7 @@ class StatsCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
+    @commands.command(help="display your personal stats within the server and its text channels")
     async def stats(self, ctx):
         with ctx.channel.typing():
             
