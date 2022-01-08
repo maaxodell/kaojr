@@ -11,3 +11,4 @@ async def on_ready():
     await client.get_channel(770480715279761414).send("Connected and ready to go!")
 
 client.load_extension('commandCogs.HelpCommands')
+client.load_extension('commandCogs.StatsCommands')

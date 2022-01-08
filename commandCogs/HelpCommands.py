@@ -14,7 +14,7 @@ class HelpCommands(commands.Cog):
         
     @commands.command()
     async def helpme(self, ctx):
-        await ctx.send("Help is on it's way, " + ctx.author.name)
+        await ctx.send("Help is on it's way, {}".format(ctx.author.name))
 
 def setup(bot):
     bot.add_cog(HelpCommands(bot))
