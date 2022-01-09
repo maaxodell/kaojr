@@ -1,7 +1,6 @@
 from discord.ext import commands
 from datetime import datetime
-
-devChannelID = "770480715279761414"
+import pytz
 
 class StatsCommands(commands.Cog):
     def __init__(self, bot):
@@ -12,8 +11,10 @@ class StatsCommands(commands.Cog):
         with ctx.channel.typing():
             
             messageCounter = 0
-            joinedDate = ctx.author.joined_at
-            now = datetime.now()
+
+            tz = pytz.timezone('Australia/Queensland')
+            joinedDate = ctx.author.joined_at.astimezone(tz)
+            now = datetime.now(tz)
             delta = now - joinedDate
 
             async for message in ctx.channel.history(limit=None):
