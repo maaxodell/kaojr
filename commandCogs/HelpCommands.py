@@ -1,7 +1,6 @@
 from discord.ext import commands
 from messageLogger import log
-
-devChannelID = "770480715279761414"
+from resources import devChannelID
 
 class HelpCommands(commands.Cog):
     def __init__(self, bot):
@@ -9,7 +8,7 @@ class HelpCommands(commands.Cog):
     
     @commands.Cog.listener()
     async def on_message(self, ctx):
-        if (ctx.author.id != self.bot.user.id) & (str(ctx.channel.id) == devChannelID):
+        if (ctx.author.id != self.bot.user.id) & (ctx.channel.id == devChannelID):
             log(ctx.author.name, ctx.content)
         
     @commands.command(help="get started with my functionality")
