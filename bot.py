@@ -14,8 +14,10 @@ client = commands.Bot(command_prefix="!", activity=activity, help_command=None)
 # Send 'connected' message to development channel 
 @client.event
 async def on_ready():
+    # Get current local time of connection
     tz = pytz.timezone('Australia/Queensland')
     time = datetime.now(tz).strftime("%I:%M:%S %p")
+    
     await client.get_channel(devChannelID).send("`Connected at {}`".format(time))
 
 # Load bot command cogs

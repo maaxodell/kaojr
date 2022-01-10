@@ -27,5 +27,18 @@ class StatsCommands(commands.Cog):
             await ctx.reply("__**Your stats, {}:**__\n:clock10: A member of {} for `{} days`\n:pencil: {} messages sent to the channel `{}`"
             .format(ctx.author.name, ctx.guild.name, delta.days, messageCounter, ctx.channel))
 
+    @commands.command(help="display your stats across the whole server (WIP)")
+    async def globalstats(self, ctx):
+        with ctx.channel.typing():
+            
+            # Get messages sent server-wide
+            messageCounter = 0
+            for channel in ctx.guild.text_channels:
+                async for message in channel.history(limit=None):
+                    if message.author == ctx.author:
+                        messageCounter += 1
+            
+            await ctx.reply("{} messages sent globally".format(messageCounter))
+
 def setup(bot):
     bot.add_cog(StatsCommands(bot))
