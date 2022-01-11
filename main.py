@@ -1,12 +1,14 @@
-# Imports
+# Module imports
 from dotenv import load_dotenv
 import os, sys
 
+# Personal imports
 from bot import client
 
+# Development variable
 sys.dont_write_bytecode = True
 
-# Load token
+# Load application token
 load_dotenv()
 token = os.getenv("TOKEN")
 
