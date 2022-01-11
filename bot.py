@@ -17,9 +17,10 @@ async def on_ready():
     # Get current local time of connection
     tz = pytz.timezone('Australia/Queensland')
     time = datetime.now(tz).strftime("%I:%M:%S %p")
-    
+
     await client.get_channel(devChannelID).send("`Connected at {}`".format(time))
 
 # Load bot command cogs
 client.load_extension('commandCogs.HelpCommands')
 client.load_extension('commandCogs.StatsCommands')
+client.load_extension('music.MusicCommands')
