@@ -1,8 +1,8 @@
-import discord
+import discord, youtube_dl, json
 from discord.ext import commands
-import youtube_dl
 from resources import musicChannelID
 from datetime import timedelta
+from youtube_search import YoutubeSearch
 
 class MusicCommands(commands.Cog):
     def __init__(self, bot):
@@ -43,7 +43,7 @@ class MusicCommands(commands.Cog):
         await ctx.voice_client.disconnect()
 
     @commands.command(help="")
-    async def play(self, ctx, url=None):
+    async def play(self, ctx, *, songName=None):
         with ctx.channel.typing():
             if not await self.checkMessage(ctx):
                 return
@@ -53,18 +53,25 @@ class MusicCommands(commands.Cog):
                 await ctx.reply("Looks like we're not in the same voice channel - use `{}join`.".format(self.bot.command_prefix))
                 return
 
-            #Check for missing URL
-            if url is None:
-                await ctx.reply("Missing URL!")
+            # Check for missing song name
+            if songName is None:
+                await ctx.reply("Missing song name!")
                 return
 
             # Delete original command message
             await ctx.message.delete()
 
+            # Find song on youtube
+            yt = YoutubeSearch(songName, max_results = 1).to_json()
+            ytid = str(json.loads(yt)['videos'][0]['id'])
+            url = "https://www.youtube.com/watch?v={}".format(ytid)
+
+            # Set options for external libraries
             FFMOPTIONS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
             YDL_OPTIONS = {'format': 'bestaudio'}
             vc = ctx.voice_client
 
+            # Download and play audio
             with youtube_dl.YoutubeDL(YDL_OPTIONS) as ydl:
                 info = ydl.extract_info(url, download=False)
                 url2 = info['formats'][0]['url']
@@ -74,6 +81,7 @@ class MusicCommands(commands.Cog):
                 **FFMOPTIONS)
                 vc.play(source)
         
+        # Send message about song
         self.songMessage = await ctx.send(":loud_sound: `{} [{}]` - {}".format(title, duration, ctx.author.name))
 
     @commands.command(help="")
