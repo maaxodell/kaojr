@@ -1,3 +1,4 @@
+from asyncio import queues
 import discord, youtube_dl, json
 from discord.ext import commands
 from resources import musicChannelID
@@ -11,36 +12,13 @@ class MusicCommands(commands.Cog):
     songMessage = None
     pauseReaction = "\u23F8"
 
-    async def checkMessage(self, ctx):
-        # Check if user in a voice channel to join
-        if ctx.author.voice is None:
-            await ctx.reply("It doesn't look like you're in a voice channel!")
-            return False
+    queue = {}
 
-        # Check for music channel
-        if not ctx.channel.id == musicChannelID:
-            await ctx.reply("Please use {} for music commands.".format(self.bot.get_channel(musicChannelID).mention))
-            return False
-
-        return True
-
-    @commands.command(help="")
-    async def join(self, ctx):
-        if not await self.checkMessage(ctx):
-            return
-
-        vc = ctx.author.voice.channel
-        if ctx.voice_client is None:
-            await vc.connect()
-        else:
-            await ctx.voice_client.move_to(vc)
-
-    @commands.command(aliases=['dc', 'leave'], help="")
-    async def disconnect(self, ctx):
-        if not await self.checkMessage(ctx):
-            return
-
-        await ctx.voice_client.disconnect()
+    def checkQueue(self, ctx, id):
+        if self.queue[id] !={}:
+            voice = ctx.guild.voice_client
+            source = self.queue[id].pop(0)
+            voice.play(source, after=lambda x=0: self.checkQueue(ctx, ctx.message.guild.id))
 
     @commands.command(help="")
     async def play(self, ctx, *, songName=None):
@@ -79,7 +57,15 @@ class MusicCommands(commands.Cog):
                 duration = str(timedelta(seconds=info.get('duration', None))) 
                 source = await discord.FFmpegOpusAudio.from_probe(url2,
                 **FFMOPTIONS)
-                vc.play(source)
+                
+            if vc.is_playing():
+                guild_id = ctx.message.guild.id
+                if guild_id in self.queue:
+                    self.queue[guild_id].append(source)
+                else:
+                    self.queue[guild_id] = [source]
+            else:
+                vc.play(source, after=lambda x=0: self.checkQueue(ctx, ctx.message.guild.id))
         
         # Send message about song
         self.songMessage = await ctx.send(":loud_sound: `{} [{}]` - {}".format(title, duration, ctx.author.name))
@@ -99,6 +85,37 @@ class MusicCommands(commands.Cog):
             
         ctx.voice_client.resume()
         await self.songMessage.clear_reaction(self.pauseReaction)
+
+    async def checkMessage(self, ctx):
+        # Check if user in a voice channel to join
+        if ctx.author.voice is None:
+            await ctx.reply("It doesn't look like you're in a voice channel!")
+            return False
+
+        # Check for music channel
+        # if not ctx.channel.id == musicChannelID:
+        #     await ctx.reply("Please use {} for music commands.".format(self.bot.get_channel(musicChannelID).mention))
+        #     return False
+
+        return True
+
+    @commands.command(help="")
+    async def join(self, ctx):
+        if not await self.checkMessage(ctx):
+            return
+
+        vc = ctx.author.voice.channel
+        if ctx.voice_client is None:
+            await vc.connect()
+        else:
+            await ctx.voice_client.move_to(vc)
+
+    @commands.command(aliases=['dc', 'leave'], help="")
+    async def disconnect(self, ctx):
+        if not await self.checkMessage(ctx):
+            return
+
+        await ctx.voice_client.disconnect()
 
 def setup(bot):
     bot.add_cog(MusicCommands(bot))
