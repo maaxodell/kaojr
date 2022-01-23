@@ -93,9 +93,9 @@ class MusicCommands(commands.Cog):
             return False
 
         # Check for music channel
-        # if not ctx.channel.id == musicChannelID:
-        #     await ctx.reply("Please use {} for music commands.".format(self.bot.get_channel(musicChannelID).mention))
-        #     return False
+        if not ctx.channel.id == musicChannelID:
+            await ctx.reply("Please use {} for music commands.".format(self.bot.get_channel(musicChannelID).mention))
+            return False
 
         return True
 
