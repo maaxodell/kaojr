@@ -11,7 +11,7 @@ class MusicCommands(commands.Cog):
     pauseReaction = "\u23F8"
     skipReaction = "\u23ED"
 
-    queue = {}
+    queues = {}
 
     class SongInfo:
         def __init__(self, title, duration, requestedBy, source):
@@ -20,14 +20,28 @@ class MusicCommands(commands.Cog):
             self.requestedBy = requestedBy
             self.source = source
 
+    # Check some conditions that apply to every command
+    async def checkMessage(self, ctx):
+            # Check if user is in a voice channel to join
+            if ctx.author.voice is None:
+                await ctx.reply("It doesn't look like you're in a voice channel!")
+                return False
+
+            # Check for music channel
+            if not ctx.channel.id == musicChannelID:
+                await ctx.reply("Please use {} for music commands.".format(self.bot.get_channel(musicChannelID).mention))
+                return False
+
+            return True
+
     # Check for songs to play next
-    def checkQueue(self, ctx, id):
+    def checkQueues(self, ctx, id):
         try:
-            if self.queue[id] != {}:
+            if self.queues[id] != {}:
                 voice = ctx.guild.voice_client
-                song = self.queue[id].pop(0)
+                song = self.queues[id].pop(0)
                 self.bot.loop.create_task(ctx.message.channel.send(":loud_sound: `{} [{}]` - {}".format(song.title, song.duration, song.requestedBy)))
-                voice.play(song.source, after=lambda x=0: self.checkQueue(ctx, ctx.message.guild.id))
+                voice.play(song.source, after=lambda x=0: self.checkQueues(ctx, ctx.message.guild.id))
         except:
             pass
 
@@ -73,24 +87,25 @@ class MusicCommands(commands.Cog):
                 source = await discord.FFmpegOpusAudio.from_probe(url2,
                 **FFMOPTIONS)
                 
+            # Create song object
             songInfo = self.SongInfo(songTitle, songDuration, ctx.author.name, source)
 
             # Play song or add to queue if music already playing
             if vc.is_playing():
                 guild_id = ctx.message.guild.id
-                if guild_id in self.queue:
-                    self.queue[guild_id].append(songInfo)
+                if guild_id in self.queues:
+                    self.queues[guild_id].append(songInfo)
                 else:
-                    self.queue[guild_id] = [songInfo]
-                if len(self.queue[guild_id]) == 1:
+                    self.queues[guild_id] = [songInfo]
+                if len(self.queues[guild_id]) == 1:
                     await ctx.send("`{}` added to the queue by {} - it's **up next!**".format(songTitle, ctx.author.name))
                 else:
-                    await ctx.send("`{}` added to the queue by {} - **{}** songs away".format(songTitle, ctx.author.name, len(self.queue[guild_id])))
+                    await ctx.send("`{}` added to the queue by {} - **{}** songs away".format(songTitle, ctx.author.name, len(self.queues[guild_id])))
             else:
-                vc.play(source, after=lambda x=0: self.checkQueue(ctx, ctx.message.guild.id))
+                vc.play(source, after=lambda x=0: self.checkQueues(ctx, ctx.message.guild.id))
                 await ctx.send(":loud_sound: `{} [{}]` - {}".format(songTitle, songDuration, ctx.author.name))
 
-    @commands.command(help="")
+    @commands.command(help="pause the current track")
     async def pause(self, ctx):
         if not await self.checkMessage(ctx):
             return
@@ -101,14 +116,14 @@ class MusicCommands(commands.Cog):
 
         ctx.voice_client.pause()
 
-    @commands.command(aliases=['r'], help="")
+    @commands.command(aliases=['r'], help="resume the paused track")
     async def resume(self, ctx):
         if not await self.checkMessage(ctx):
             return
 
         ctx.voice_client.resume()
 
-    @commands.command(aliases=['s'], help="")
+    @commands.command(aliases=['s'], help="skip the current track if another song is in the queue")
     async def skip(self, ctx):
         if not await self.checkMessage(ctx):
             return
@@ -118,23 +133,10 @@ class MusicCommands(commands.Cog):
             return
 
         await ctx.message.add_reaction(self.skipReaction)
-        ctx.voice_client.stop()
-        self.checkQueue(ctx, ctx.message.guild.id)    
+        # Triggers "after" promise to check the queue for the next song
+        ctx.voice_client.stop()  
 
-    async def checkMessage(self, ctx):
-        # Check if user in a voice channel to join
-        if ctx.author.voice is None:
-            await ctx.reply("It doesn't look like you're in a voice channel!")
-            return False
-
-        # Check for music channel
-        if not ctx.channel.id == musicChannelID:
-            await ctx.reply("Please use {} for music commands.".format(self.bot.get_channel(musicChannelID).mention))
-            return False
-
-        return True
-
-    @commands.command(help="")
+    @commands.command(help="summon me to your voice channel")
     async def join(self, ctx):
         if not await self.checkMessage(ctx):
             return
@@ -145,17 +147,29 @@ class MusicCommands(commands.Cog):
         else:
             await ctx.voice_client.move_to(vc)
 
-    @commands.command(aliases=['dc', 'leave'], help="")
+    @commands.command(aliases=['dc', 'leave'], help="kick me out of the voice channel")
     async def disconnect(self, ctx):
         if not await self.checkMessage(ctx):
             return
 
         await ctx.voice_client.disconnect()
 
-    @commands.command(aliases=['q'], help="")
+    @commands.command(aliases=['q'], help="display the current queue of songs")
     async def queue(self, ctx):
-        for song in self.queue:
-            await ctx.send(song.name)
+        # Check for empty or non-existent queue
+        if self.queues == {}:
+            await ctx.reply("Nothing queued!")
+            return
+        elif len(self.queues[ctx.message.guild.id]) == 0:
+            await ctx.reply("Nothing queued!")
+            return
+
+        # Create, format and send message containing current queue
+        queueMessage = "Coming up:\n"
+        for song in self.queues[ctx.message.guild.id]:
+            queuePosition = self.queues[ctx.message.guild.id].index(song) + 1
+            queueMessage += ("**{}.** {} [{}] - {}\n".format(queuePosition, song.title, song.duration, song.requestedBy))
+        await ctx.send(queueMessage)
 
 def setup(bot):
     bot.add_cog(MusicCommands(bot))
