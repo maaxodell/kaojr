@@ -3,15 +3,21 @@ from discord.ext import commands
 from resources import musicChannelID
 from youtube_search import YoutubeSearch
 
+# Developer mode switch
+devMode = True
+
 class MusicCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    pauseReaction = "\u23F8"
-    playReaction = "\u25B6"
-    skipReaction = "\u23ED"
-
     queues = {}
+
+    reactions = [
+        "\U000023F8",   # 0 - Pause
+        "\U000025B6",   # 1 - Play
+        "\U000023ED",   # 2 - Skip
+        "\U0001F44B"    # 3 - Wave
+    ]
 
     class SongInfo:
         def __init__(self, title, duration, requestedBy, source):
@@ -28,9 +34,10 @@ class MusicCommands(commands.Cog):
                 return False
 
             # Check for music channel
-            if not ctx.channel.id == musicChannelID:
-                await ctx.reply("Please use {} for music commands.".format(self.bot.get_channel(musicChannelID).mention))
-                return False
+            if not devMode:
+                if not ctx.channel.id == musicChannelID:
+                    await ctx.reply("Please use {} for music commands.".format(self.bot.get_channel(musicChannelID).mention))
+                    return False
 
             return True
 
@@ -114,7 +121,7 @@ class MusicCommands(commands.Cog):
             await ctx.reply("Nothing to pause!")
             return
 
-        await ctx.message.add_reaction(self.pauseReaction)
+        await ctx.message.add_reaction(self.reactions[0])
         ctx.voice_client.pause()
 
     @commands.command(aliases=['r'], help="resume the paused track")
@@ -122,7 +129,7 @@ class MusicCommands(commands.Cog):
         if not await self.checkMessage(ctx):
             return
 
-        await ctx.message.add_reaction(self.playReaction)
+        await ctx.message.add_reaction(self.reactions[1])
         ctx.voice_client.resume()
 
     @commands.command(aliases=['s'], help="skip the current track if another song is in the queue")
@@ -134,7 +141,7 @@ class MusicCommands(commands.Cog):
             await ctx.reply("Nothing playing to be skipped!")
             return
 
-        await ctx.message.add_reaction(self.skipReaction)
+        await ctx.message.add_reaction(self.reactions[2])
         # Triggers "after" promise to check the queue for the next song
         ctx.voice_client.stop()  
 
@@ -148,6 +155,8 @@ class MusicCommands(commands.Cog):
             await vc.connect()
         else:
             await ctx.voice_client.move_to(vc)
+
+        await ctx.message.add_reaction(self.reactions[3])
 
     @commands.command(aliases=['dc', 'leave'], help="kick me out of the voice channel")
     async def disconnect(self, ctx):
