@@ -7,8 +7,8 @@ class MusicCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    songMessage = None
     pauseReaction = "\u23F8"
+    playReaction = "\u25B6"
     skipReaction = "\u23ED"
 
     queues = {}
@@ -114,6 +114,7 @@ class MusicCommands(commands.Cog):
             await ctx.reply("Nothing to pause!")
             return
 
+        await ctx.message.add_reaction(self.pauseReaction)
         ctx.voice_client.pause()
 
     @commands.command(aliases=['r'], help="resume the paused track")
@@ -121,6 +122,7 @@ class MusicCommands(commands.Cog):
         if not await self.checkMessage(ctx):
             return
 
+        await ctx.message.add_reaction(self.playReaction)
         ctx.voice_client.resume()
 
     @commands.command(aliases=['s'], help="skip the current track if another song is in the queue")
@@ -136,7 +138,7 @@ class MusicCommands(commands.Cog):
         # Triggers "after" promise to check the queue for the next song
         ctx.voice_client.stop()  
 
-    @commands.command(help="summon me to your voice channel")
+    @commands.command(aliases=['j'], help="summon me to your voice channel")
     async def join(self, ctx):
         if not await self.checkMessage(ctx):
             return
