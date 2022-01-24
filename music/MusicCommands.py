@@ -152,5 +152,10 @@ class MusicCommands(commands.Cog):
 
         await ctx.voice_client.disconnect()
 
+    @commands.command(aliases=['q'], help="")
+    async def queue(self, ctx):
+        for song in self.queue:
+            await ctx.send(song.name)
+
 def setup(bot):
     bot.add_cog(MusicCommands(bot))
