@@ -1,8 +1,6 @@
-from asyncio import queues
 import discord, youtube_dl, json
 from discord.ext import commands
 from resources import musicChannelID
-from datetime import timedelta
 from youtube_search import YoutubeSearch
 
 class MusicCommands(commands.Cog):
@@ -11,6 +9,7 @@ class MusicCommands(commands.Cog):
 
     songMessage = None
     pauseReaction = "\u23F8"
+    skipReaction = "\u23ED"
 
     queue = {}
 
@@ -23,28 +22,31 @@ class MusicCommands(commands.Cog):
 
     # Check for songs to play next
     def checkQueue(self, ctx, id):
-        if self.queue[id] !={}:
-            voice = ctx.guild.voice_client
-            song = self.queue[id].pop(0)
-            voice.play(song.source, after=lambda x=0: self.checkQueue(ctx, ctx.message.guild.id))
-            ctx.send(":loud_sound: `{} [{}]` - {}".format(song.title, song.duration, song.requestedBy))
+        try:
+            if self.queue[id] != {}:
+                voice = ctx.guild.voice_client
+                song = self.queue[id].pop(0)
+                self.bot.loop.create_task(ctx.message.channel.send(":loud_sound: `{} [{}]` - {}".format(song.title, song.duration, song.requestedBy)))
+                voice.play(song.source, after=lambda x=0: self.checkQueue(ctx, ctx.message.guild.id))
+        except:
+            pass
 
-    @commands.command(help="play some tunes in your voice channel")
+    @commands.command(aliases=['p'], help="play some tunes in your voice channel")
     async def play(self, ctx, *, songName=None):
+        if not await self.checkMessage(ctx):
+            return
+        
+        # Check for different voice channel
+        if ctx.voice_client is None or not ctx.author.voice.channel == ctx.voice_client.channel:
+            await ctx.reply("Looks like we're not in the same voice channel - use `{}join`.".format(self.bot.command_prefix))
+            return
+
+        # Check for missing song name
+        if songName is None:
+            await ctx.reply("Missing song name!")
+            return    
+
         with ctx.channel.typing():
-            if not await self.checkMessage(ctx):
-                return
-            
-            # Check for different voice channel
-            if ctx.voice_client is None or not ctx.author.voice.channel == ctx.voice_client.channel:
-                await ctx.reply("Looks like we're not in the same voice channel - use `{}join`.".format(self.bot.command_prefix))
-                return
-
-            # Check for missing song name
-            if songName is None:
-                await ctx.reply("Missing song name!")
-                return
-
             # Delete original command message
             await ctx.message.delete()
 
@@ -54,7 +56,10 @@ class MusicCommands(commands.Cog):
             songID = ytdata['id']
             songTitle = ytdata['title']
             songDuration = ytdata['duration']
-            url = "https://www.youtube.com/watch?v={}".format(songID)
+            if not ("https://www.youtube" in songName or "https://youtu.be" in songName):
+                url = "https://www.youtube.com/watch?v={}".format(songID)
+            else:
+                url = songName
 
             # Set options for external libraries
             FFMOPTIONS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
@@ -77,7 +82,10 @@ class MusicCommands(commands.Cog):
                     self.queue[guild_id].append(songInfo)
                 else:
                     self.queue[guild_id] = [songInfo]
-                await ctx.send("`{}` added to the queue".format(songTitle))
+                if len(self.queue[guild_id]) == 1:
+                    await ctx.send("`{}` added to the queue by {} - it's **up next!**".format(songTitle, ctx.author.name))
+                else:
+                    await ctx.send("`{}` added to the queue by {} - **{}** songs away".format(songTitle, ctx.author.name, len(self.queue[guild_id])))
             else:
                 vc.play(source, after=lambda x=0: self.checkQueue(ctx, ctx.message.guild.id))
                 await ctx.send(":loud_sound: `{} [{}]` - {}".format(songTitle, songDuration, ctx.author.name))
@@ -87,16 +95,31 @@ class MusicCommands(commands.Cog):
         if not await self.checkMessage(ctx):
             return
 
-        ctx.voice_client.pause()
-        await self.songMessage.add_reaction(self.pauseReaction)
+        if not ctx.voice_client.is_playing():
+            await ctx.reply("Nothing to pause!")
+            return
 
-    @commands.command(help="")
+        ctx.voice_client.pause()
+
+    @commands.command(aliases=['r'], help="")
     async def resume(self, ctx):
         if not await self.checkMessage(ctx):
             return
-            
+
         ctx.voice_client.resume()
-        await self.songMessage.clear_reaction(self.pauseReaction)
+
+    @commands.command(aliases=['s'], help="")
+    async def skip(self, ctx):
+        if not await self.checkMessage(ctx):
+            return
+
+        if not ctx.voice_client.is_playing():
+            await ctx.reply("Nothing playing to be skipped!")
+            return
+
+        await ctx.message.add_reaction(self.skipReaction)
+        ctx.voice_client.stop()
+        self.checkQueue(ctx, ctx.message.guild.id)    
 
     async def checkMessage(self, ctx):
         # Check if user in a voice channel to join
